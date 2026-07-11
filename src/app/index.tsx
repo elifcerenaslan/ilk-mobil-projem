@@ -17,7 +17,6 @@ type PatternItem = {
   scale: number;
 };
 
-// Çarkın üzerindeki görsel düzeni temsil eden statik dilimler
 const DILIMLER = [
   { id: 'unknown_road', dk: 25, renk: '#76B2E2', name: 'Unknown Road', image: require('../../assets/images/fluffy_life/unknown_road.png'), imageB: require('../../assets/images/fluffy_life/unknown_road.png') }, 
   { id: 'fly_to_your_own_mountain', dk: 30, renk: '#B39DDB', name: 'Fly To Your Own Mountain', image: require('../../assets/images/growing_up_by_your_way/fly_to_your_own_mountain.png'), imageB: require('../../assets/images/growing_up_by_your_way/fly_to_your_own_mountain.png') }, 
@@ -29,9 +28,7 @@ const DILIMLER = [
   { id: 'dream', dk: 90, renk: '#B39DDB', name: 'Dream', image: require('../../assets/images/growing_up_by_your_way/dream.png'), imageB: require('../../assets/images/growing_up_by_your_way/dream.png') },
 ];
 
-// 🌟 TÜM ENVENTERİN GERÇEK GÖRSEL VERİTABANI HARİTASI (Odadaki canlanmayı sağlayan büyük köprü 🎯)
 const GLOBAL_NYOTA_IMAGES: { [key: string]: { normal: any; anim: any } } = {
-  // 1. Seri: Fluffy Life
   'f1': { normal: require('../../assets/images/fluffy_life/unknown_road.png'), anim: require('../../assets/images/fluffy_life/unknown_road.png') },
   'f2': { normal: require('../../assets/images/fluffy_life/brave_together.png'), anim: require('../../assets/images/fluffy_life/brave_together.png') },
   'f3': { normal: require('../../assets/images/fluffy_life/warm_sunlight.png'), anim: require('../../assets/images/fluffy_life/warm_sunlight.png') },
@@ -46,7 +43,6 @@ const GLOBAL_NYOTA_IMAGES: { [key: string]: { normal: any; anim: any } } = {
   'f12': { normal: require('../../assets/images/fluffy_life/little_mountain.png'), anim: require('../../assets/images/fluffy_life/little_mountain.png') },
   'f_secret': { normal: require('../../assets/images/fluffy_life/cotton_candy_daydream.png'), anim: require('../../assets/images/fluffy_life/cotton_candy_daydream.png') },
 
-  // 2. Seri: Growing Up by Your Way
   'g1': { normal: require('../../assets/images/growing_up_by_your_way/growing_up.png'), anim: require('../../assets/images/growing_up_by_your_way/growing_up.png') },
   'g2': { normal: require('../../assets/images/growing_up_by_your_way/hidden_love.png'), anim: require('../../assets/images/growing_up_by_your_way/hidden_love.png') },
   'g3': { normal: require('../../assets/images/growing_up_by_your_way/time.png'), anim: require('../../assets/images/growing_up_by_your_way/time.png') },
@@ -61,7 +57,6 @@ const GLOBAL_NYOTA_IMAGES: { [key: string]: { normal: any; anim: any } } = {
   'g12': { normal: require('../../assets/images/growing_up_by_your_way/thinking.png'), anim: require('../../assets/images/growing_up_by_your_way/thinking.png') },
   'g_secret': { normal: require('../../assets/images/growing_up_by_your_way/fly_to_your_own_mountain.png'), anim: require('../../assets/images/growing_up_by_your_way/fly_to_your_own_mountain.png') },
 
-  // 3. Seri: I Am The Seasons
   's1': { normal: require('../../assets/images/i_am_the_seasons/genesis.png'), anim: require('../../assets/images/i_am_the_seasons/genesis.png') },
   's2': { normal: require('../../assets/images/i_am_the_seasons/spring_wisteria.png'), anim: require('../../assets/images/i_am_the_seasons/spring_wisteria.png') },
   's3': { normal: require('../../assets/images/i_am_the_seasons/bamboo_after_rain.png'), anim: require('../../assets/images/i_am_the_seasons/bamboo_after_rain.png') },
@@ -76,7 +71,6 @@ const GLOBAL_NYOTA_IMAGES: { [key: string]: { normal: any; anim: any } } = {
   's12': { normal: require('../../assets/images/i_am_the_seasons/cloudwatcher.png'), anim: require('../../assets/images/i_am_the_seasons/cloudwatcher.png') },
   's_secret': { normal: require('../../assets/images/i_am_the_seasons/walking_into_spring.png'), anim: require('../../assets/images/i_am_the_seasons/walking_into_spring.png') },
 
-  // 4. Seri: We Are All Stars
   'a1': { normal: require('../../assets/images/we_are_all_stars/sanctuary_star.png'), anim: require('../../assets/images/we_are_all_stars/sanctuary_star.png') },
   'a2': { normal: require('../../assets/images/we_are_all_stars/reminiscence_star.png'), anim: require('../../assets/images/we_are_all_stars/reminiscence_star.png') },
   'a3': { normal: require('../../assets/images/we_are_all_stars/meteor_shower.png'), anim: require('../../assets/images/we_are_all_stars/meteor_shower.png') },
@@ -121,9 +115,8 @@ export default function HomeScreen() {
   const [uygulamaModu, setUygulamaModu] = useState<'mod_secimi' | 'manuel' | 'cark' | 'odaklanma_odasi'>('mod_secimi');
   const [secilenDk, setSecilenDk] = useState(25);
   const [isSpinning, setIsSpinning] = useState(false);
-  
-  // 🌟 Global Hafıza verilerini dinliyoruz
-  const { starPoints, setStarPoints, activeNyotaId } = useNyota(); 
+
+  const { starPoints, setStarPoints, activeNyotaId, seansEkle } = useNyota(); 
 
   const [kalanSaniye, setKalanSaniye] = useState(0);
   const [frameActive, setFrameActive] = useState(false); 
@@ -164,6 +157,7 @@ export default function HomeScreen() {
         setKalanSaniye((prev) => {
           if (prev <= 1) {
             setStarPoints((currentPoints) => currentPoints + (secilenDk * 10));
+            seansEkle(secilenDk, activeNyotaId || 'f1');
             odaklanmayiBitir();
             return 0;
           }
@@ -228,11 +222,8 @@ export default function HomeScreen() {
       outputRange: ['0%', '100%'],
     });
 
-    // 🌟 KİLİT ÇÖZÜMÜ: Eğer activeNyotaId bizim yeni 52 karakterlik haritada (`f1`, `g2` vs.) varsa resmini oradan çeker.
-    // Eğer çarkın eski statik ID'lerinden biriyse uyumluluk için dönüştürür, hiçbiri yoksa 'f1' (Unknown Road) fırlatır.
     let yoldasAnahtari = activeNyotaId || 'f1';
     
-    // Eski çark ID'leri ile yeni ID dilini senkronize eden emniyet dönüşümü
     if (yoldasAnahtari === 'unknown_road') yoldasAnahtari = 'f1';
     if (yoldasAnahtari === 'fly_to_your_own_mountain') yoldasAnahtari = 'g_secret';
     if (yoldasAnahtari === 'walking_into_spring') yoldasAnahtari = 's_secret';
@@ -247,19 +238,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.özgünOdaklanmaArkaPlan}>
         {BACKGROUND_PATTERN.map((item, index) => (
-          <View
-            key={index}
-            style={[
-              styles.patternIkonKapsayici,
-              {
-                top: item.top || undefined,
-                bottom: item.bottom || undefined,
-                left: item.left || undefined,
-                right: item.right || undefined,
-                transform: [{ rotate: item.rotate }, { scale: item.scale }],
-              } as any
-            ]}
-          >
+          <View key={index} style={[styles.patternIkonKapsayici, { top: item.top || undefined, bottom: item.bottom || undefined, left: item.left || undefined, right: item.right || undefined, transform: [{ rotate: item.rotate }, { scale: item.scale }] } as any]} >
             <Sparkles size={45} color="rgba(118, 178, 226, 0.05)" />
           </View>
         ))}
@@ -270,19 +249,11 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.odaNyotaMerkez}>
-          <Image 
-            source={frameActive ? odadakiYoldasData.anim : odadakiYoldasData.normal} 
-            style={styles.odaDevNyotaGörsel} 
-          />
+          <Image source={frameActive ? odadakiYoldasData.anim : odadakiYoldasData.normal} style={styles.odaDevNyotaGörsel} />
         </View>
 
         <View style={styles.odaAltGrup}>
-          <TouchableOpacity 
-            activeOpacity={0.8}
-            onPressIn={handleHoldStart}
-            onPressOut={handleHoldRelease}
-            style={styles.iptalHoldButon}
-          >
+          <TouchableOpacity activeOpacity={0.8} onPressIn={handleHoldStart} onPressOut={handleHoldRelease} style={styles.iptalHoldButon} >
             <Animated.View style={[styles.iptalDolumBarı, { width: widthInterpolate }]} />
             <X size={18} color="#FF8A80" style={{ marginRight: 6, zIndex: 5 }} />
             <Text style={styles.iptalButonYazisi}>İptal Etmek İçin Basılı Tut</Text>
@@ -295,19 +266,7 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       {BACKGROUND_PATTERN.map((item, index) => (
-        <View
-          key={index}
-          style={[
-            styles.patternIkonKapsayici,
-            {
-              top: item.top || undefined,
-              bottom: item.bottom || undefined,
-              left: item.left || undefined,
-              right: item.right || undefined,
-              transform: [{ rotate: item.rotate }, { scale: item.scale }],
-            } as any
-          ]}
-        >
+        <View key={index} style={[styles.patternIkonKapsayici, { top: item.top || undefined, bottom: item.bottom || undefined, left: item.left || undefined, right: item.right || undefined, transform: [{ rotate: item.rotate }, { scale: item.scale }] } as any]} >
           <Sparkles size={45} color="rgba(118, 178, 226, 0.06)" />
         </View>
       ))}
@@ -352,7 +311,7 @@ export default function HomeScreen() {
                 <Text style={styles.geriDonText}>Değiştir</Text>
               </TouchableOpacity>
               <Text style={styles.miniTitle}>Nyota Focus</Text>
-              <View style={{ width: 65 }} />
+              <View style={{ width: 34 }} />
             </View>
             <View style={styles.sureKonteyner}>
               <Text style={styles.sureText}>{secilenDk}</Text>
@@ -373,16 +332,8 @@ export default function HomeScreen() {
                 {DILIMLER.map((dilim) => {
                   const isAktif = secilenDk === dilim.dk;
                   return (
-                    <TouchableOpacity
-                      key={dilim.dk}
-                      activeOpacity={0.9}
-                      style={[styles.interaktifKart, isAktif && styles.interaktifKartAktif]}
-                      onPress={() => setSecilenDk(dilim.dk)}
-                    >
-                      <Image 
-                        source={dilim.image} 
-                        style={[styles.kartIçiNyota, isAktif ? styles.kartIçiNyotaAktif : styles.kartIçiNyotaPasif]} 
-                      />
+                    <TouchableOpacity key={dilim.dk} activeOpacity={0.9} style={[styles.interaktifKart, isAktif && styles.interaktifKartAktif]} onPress={() => setSecilenDk(dilim.dk)} >
+                      <Image source={dilim.image} style={[styles.kartIçiNyota, isAktif ? styles.kartIçiNyotaAktif : styles.kartIçiNyotaPasif]} />
                       <Text style={[styles.seritDkText, isAktif && styles.seritDkTextAktif]}>{dilim.dk}</Text>
                       <Text style={[styles.seritDkAltYazi, isAktif && styles.seritDkAltYaziAktif]}>DAKİKA</Text>
                     </TouchableOpacity>
@@ -404,16 +355,7 @@ export default function HomeScreen() {
                       return (
                         <G key={index}>
                           <Path d={pathData} fill={dilim.renk} stroke="#FFFFFF" strokeWidth={2.5} />
-                          <SVG_YAZI
-                            x={yaziKonum.x}
-                            y={yaziKonum.y}
-                            fill="#FFFFFF"
-                            fontSize="11"
-                            fontWeight="900"
-                            textAnchor="middle"
-                            alignmentBaseline="middle"
-                            transform={`rotate(${baslangicAcisi + dilimAcisi / 2}, ${yaziKonum.x}, ${yaziKonum.y})`}
-                          >
+                          <SVG_YAZI x={yaziKonum.x} y={yaziKonum.y} fill="#FFFFFF" fontSize="11" fontWeight="900" textAnchor="middle" alignmentBaseline="middle" transform={`rotate(${baslangicAcisi + dilimAcisi / 2}, ${yaziKonum.x}, ${yaziKonum.y})`} >
                             {`${dilim.dk} dk`}
                           </SVG_YAZI>
                         </G>
@@ -429,10 +371,7 @@ export default function HomeScreen() {
                   const x = RADIUS + radyus * Math.sin((merkezAcisi * Math.PI) / 180) - (fWidth / 2);
                   const y = RADIUS - radyus * Math.cos((merkezAcisi * Math.PI) / 180) - (fHeight / 2);
                   return (
-                    <Image 
-                      key={index} 
-                      source={dilim.image} 
-                      style={[styles.mutlakNyotaGorseli, { width: fWidth, height: fHeight, left: x, top: y, transform: [{ rotate: `${merkezAcisi}deg` }] }]}/ >
+                    <Image key={index} source={dilim.image} style={[styles.mutlakNyotaGorseli, { width: fWidth, height: fHeight, left: x, top: y, transform: [{ rotate: `${merkezAcisi}deg` }] }]}/>
                   );
                 })}
                 <View style={styles.carkGobegi} />
@@ -467,8 +406,8 @@ const styles = StyleSheet.create({
   yoldaşUyarıKutusu: { paddingHorizontal: 20, paddingVertical: 8, backgroundColor: 'rgba(118, 178, 226, 0.12)', borderRadius: 16, marginVertical: 15 },
   yoldaşUyarıText: { fontSize: 12, fontWeight: '600', color: '#76B2E2', textAlign: 'center' },
   özgünOdaklanmaArkaPlan: { flex: 1, backgroundColor: '#FAF0E6', alignItems: 'center', justifyContent: 'space-between', paddingVertical: height * 0.05 },
-  odaSayaçGrup: { alignItems: 'center', marginTop: 15, zIndex: 15 },
-  odaSayaçText: { fontSize: 78, fontWeight: 'bold', color: '#F5C6C6', fontFamily: 'sans-serif-light', letterSpacing: 1 },
+  odaSayaçGrup: { alignItems: 'center', marginTop: height * 0.12, zIndex: 15 },
+  odaSayaçText: { fontSize: 90, fontWeight: 'bold', color: '#F5C6C6', fontFamily: 'sans-serif-light', letterSpacing: 1 },
   odaSayaçAltYazi: { fontSize: 11, fontWeight: '800', color: '#AE8875', letterSpacing: 3, marginTop: 2 },
   odaNyotaMerkez: { flex: 1, alignItems: 'center', justifyContent: 'center', width: '100%', zIndex: 15 },
   odaDevNyotaGörsel: { width: 290, height: 390, resizeMode: 'contain' },
@@ -514,5 +453,5 @@ const styles = StyleSheet.create({
   anaButon: { flexDirection: 'row', width: '100%', height: 52, backgroundColor: '#B39DDB', borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
   pasifButon: { backgroundColor: '#D1C4E9' },
   baslatButonu: { flexDirection: 'row', width: '100%', height: 52, backgroundColor: '#76B2E2', borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
-  butonYazisi: { fontSize: 16, fontWeight: 'bold', color: '#FFFFFF' },
+  butonYazisi: { fontSize: 16, fontWeight: 'bold', color: '#FFFFFF' }
 });
