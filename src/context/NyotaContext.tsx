@@ -18,6 +18,8 @@ type NyotaContextType = {
   setActiveNyotaId: (id: string) => void;
   seansGecmisi: FocusSession[];
   seansEkle: (sure: number, nyotaId: string) => void;
+  isSoundEnabled: boolean;
+  setIsSoundEnabled: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const NyotaContext = createContext<NyotaContextType | undefined>(undefined);
@@ -27,6 +29,7 @@ export const NyotaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [ownedNyotas, setOwnedNyotas] = useState<string[]>(['f1']); 
   const [activeNyotaId, setActiveNyotaId] = useState<string>('f1');
   const [seansGecmisi, setSeansGecmisi] = useState<FocusSession[]>([]);
+  const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
 
   // 1. HAFIZADAN TÜM VERİLERİ ÇEK
@@ -37,11 +40,13 @@ export const NyotaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const savedNyotas = await AsyncStorage.getItem('@NyotaFocus:owned_nyotas');
         const savedActiveNyota = await AsyncStorage.getItem('@NyotaFocus:active_nyota');
         const savedHistory = await AsyncStorage.getItem('@NyotaFocus:history');
+        const savedSound = await AsyncStorage.getItem('@NyotaFocus:sound');
 
         if (savedPoints !== null) setStarPoints(parseInt(savedPoints, 10));
         if (savedNyotas !== null) setOwnedNyotas(JSON.parse(savedNyotas));
         if (savedActiveNyota !== null) setActiveNyotaId(savedActiveNyota);
         if (savedHistory !== null) setSeansGecmisi(JSON.parse(savedHistory));
+        if (savedSound !== null) setIsSoundEnabled(savedSound === 'true');
       } catch (e) {
         console.error("Hafıza yüklenirken hata oluştu:", e);
       } finally {
@@ -72,6 +77,13 @@ export const NyotaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       AsyncStorage.setItem('@NyotaFocus:history', JSON.stringify(seansGecmisi));
     }
   }, [seansGecmisi, loading]);
+
+  // 5. SES DURUMU DEĞİŞTİKÇE KAYDET
+  useEffect(() => {
+    if (!loading) {
+      AsyncStorage.setItem('@NyotaFocus:sound', isSoundEnabled.toString());
+    }
+  }, [isSoundEnabled, loading]);
 
   const addNyotaToCollection = (id: string) => {
     setOwnedNyotas((prev) => {
@@ -114,7 +126,9 @@ export const NyotaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       activeNyotaId, 
       setActiveNyotaId: updateActiveNyota,
       seansGecmisi,
-      seansEkle
+      seansEkle,
+      isSoundEnabled,
+      setIsSoundEnabled
     }}>
       {!loading && children}
     </NyotaContext.Provider>

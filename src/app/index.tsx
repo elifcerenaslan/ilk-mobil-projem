@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Animated, Dimensions, Image, ScrollView } from 'react-native';
-import { Play, RotateCcw, Compass, Sliders, ChevronLeft, Sparkles, Star, X } from 'lucide-react-native';
+import { Play, RotateCcw, Compass, Sliders, ChevronLeft, Sparkles, Star, X, Volume2, VolumeX } from 'lucide-react-native';
 import Svg, { G, Path, Text as SVG_YAZI } from 'react-native-svg';
+import { useAudioPlayer } from 'expo-audio';
 import { useNyota } from '../context/NyotaContext'; 
 
 const { width, height } = Dimensions.get('window');
@@ -116,7 +117,9 @@ export default function HomeScreen() {
   const [secilenDk, setSecilenDk] = useState(25);
   const [isSpinning, setIsSpinning] = useState(false);
 
-  const { starPoints, setStarPoints, activeNyotaId, seansEkle } = useNyota(); 
+  const { starPoints, setStarPoints, activeNyotaId, seansEkle, isSoundEnabled, setIsSoundEnabled } = useNyota(); 
+  
+  const ambientPlayer = useAudioPlayer(require('../../assets/audio/ambient.mp3'));
 
   const [kalanSaniye, setKalanSaniye] = useState(0);
   const [frameActive, setFrameActive] = useState(false); 
@@ -176,11 +179,22 @@ export default function HomeScreen() {
     };
   }, [uygulamaModu, kalanSaniye]);
 
+  useEffect(() => {
+    if (uygulamaModu === 'odaklanma_odasi' && isSoundEnabled) {
+      ambientPlayer.loop = true;
+      ambientPlayer.play();
+    } else {
+      ambientPlayer.pause();
+    }
+  }, [uygulamaModu, isSoundEnabled, ambientPlayer]);
+
   const odaklanmayiBitir = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     if (animationRef.current) clearInterval(animationRef.current);
     setUygulamaModu('mod_secimi');
     holdProgress.setValue(0);
+    ambientPlayer.pause();
+    ambientPlayer.seekTo(0);
   };
 
   const handleHoldStart = () => {
@@ -242,6 +256,17 @@ export default function HomeScreen() {
             <Sparkles size={45} color="rgba(118, 178, 226, 0.05)" />
           </View>
         ))}
+
+        <TouchableOpacity 
+          style={styles.odaSesButonKapsayici} 
+          onPress={() => setIsSoundEnabled(!isSoundEnabled)}
+        >
+          {isSoundEnabled ? (
+            <Volume2 size={22} color="#AE8875" />
+          ) : (
+            <VolumeX size={22} color="#BDBDBD" />
+          )}
+        </TouchableOpacity>
 
         <View style={styles.odaSayaçGrup}>
           <Text style={styles.odaSayaçText}>{formatSüre(kalanSaniye)}</Text>
@@ -406,6 +431,7 @@ const styles = StyleSheet.create({
   yoldaşUyarıKutusu: { paddingHorizontal: 20, paddingVertical: 8, backgroundColor: 'rgba(118, 178, 226, 0.12)', borderRadius: 16, marginVertical: 15 },
   yoldaşUyarıText: { fontSize: 12, fontWeight: '600', color: '#76B2E2', textAlign: 'center' },
   özgünOdaklanmaArkaPlan: { flex: 1, backgroundColor: '#FAF0E6', alignItems: 'center', justifyContent: 'space-between', paddingVertical: height * 0.05 },
+  odaSesButonKapsayici: { position: 'absolute', top: height * 0.065, right: 20, width: 44, height: 44, borderRadius: 22, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3, elevation: 2, zIndex: 99 },
   odaSayaçGrup: { alignItems: 'center', marginTop: height * 0.12, zIndex: 15 },
   odaSayaçText: { fontSize: 90, fontWeight: 'bold', color: '#F5C6C6', fontFamily: 'sans-serif-light', letterSpacing: 1 },
   odaSayaçAltYazi: { fontSize: 11, fontWeight: '800', color: '#AE8875', letterSpacing: 3, marginTop: 2 },

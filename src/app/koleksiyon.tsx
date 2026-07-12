@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, Dimensions, Image, TouchableOpacity, Alert } from 'react-native';
-import { HelpCircle, Star, Gift, Check, Sparkles, X } from 'lucide-react-native';
-import { useNyota } from '../context/NyotaContext'; 
+import { useAudioPlayer } from 'expo-audio';
+import { Check, Gift, HelpCircle, Sparkles, Star, X } from 'lucide-react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useNyota } from '../context/NyotaContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -9,8 +10,8 @@ const { width, height } = Dimensions.get('window');
 // 1. SERİ: FLUFFY LIFE FİGÜRLERİ
 // ==========================================
 const FLUFFY_LIFE_FIGURLERI = [
-  { id: 'f1', name: 'Unknown\nRoad', image: require('../../assets/images/fluffy_life/unknown_road.png'), isSecret: false }, 
-  { id: 'f2', name: 'Brave\nTogether', image: require('../../assets/images/fluffy_life/brave_together.png'), isSecret: false }, 
+  { id: 'f1', name: 'Unknown\nRoad', image: require('../../assets/images/fluffy_life/unknown_road.png'), isSecret: false },
+  { id: 'f2', name: 'Brave\nTogether', image: require('../../assets/images/fluffy_life/brave_together.png'), isSecret: false },
   { id: 'f3', name: 'Warm\nSunlight', image: require('../../assets/images/fluffy_life/warm_sunlight.png'), isSecret: false },
   { id: 'f4', name: 'Calling', image: require('../../assets/images/fluffy_life/calling.png'), isSecret: false },
   { id: 'f5', name: 'See\nLove', image: require('../../assets/images/fluffy_life/see_love.png'), isSecret: false },
@@ -21,14 +22,14 @@ const FLUFFY_LIFE_FIGURLERI = [
   { id: 'f10', name: 'Lost\nStar', image: require('../../assets/images/fluffy_life/lost_star.png'), isSecret: false },
   { id: 'f11', name: 'Home', image: require('../../assets/images/fluffy_life/home.png'), isSecret: false },
   { id: 'f12', name: 'Little\nMountain', image: require('../../assets/images/fluffy_life/little_mountain.png'), isSecret: false },
-  { id: 'f_secret', name: 'Cotton\nCandy Daydream', image: null, isSecret: true },
+  { id: 'f_secret', name: 'Cotton\nCandy Daydream', image: require('../../assets/images/fluffy_life/cotton_candy_daydream.png'), isSecret: true },
 ];
 
 // ==========================================
 // 2. SERİ: GROWING UP BY YOUR WAY FİGÜRLERİ
 // ==========================================
 const GROWING_UP_FIGURLERI = [
-  { id: 'g1', name: 'Growing\nUp', image: require('../../assets/images/growing_up_by_your_way/growing_up.png'), isSecret: false }, 
+  { id: 'g1', name: 'Growing\nUp', image: require('../../assets/images/growing_up_by_your_way/growing_up.png'), isSecret: false },
   { id: 'g2', name: 'Hidden\nLove', image: require('../../assets/images/growing_up_by_your_way/hidden_love.png'), isSecret: false },
   { id: 'g3', name: 'Time', image: require('../../assets/images/growing_up_by_your_way/time.png'), isSecret: false },
   { id: 'g4', name: 'Into\nMy Heart', image: require('../../assets/images/growing_up_by_your_way/into_my_heart.png'), isSecret: false },
@@ -47,7 +48,7 @@ const GROWING_UP_FIGURLERI = [
 // 3. SERİ: I AM THE SEASONS FİGÜRLERİ
 // ==========================================
 const SEASONS_FIGURLERI = [
-  { id: 's1', name: 'Genesis', image: require('../../assets/images/i_am_the_seasons/genesis.png'), isSecret: false }, 
+  { id: 's1', name: 'Genesis', image: require('../../assets/images/i_am_the_seasons/genesis.png'), isSecret: false },
   { id: 's2', name: 'Spring\nWisteria', image: require('../../assets/images/i_am_the_seasons/spring_wisteria.png'), isSecret: false },
   { id: 's3', name: 'Bamboo\nAfter Rain', image: require('../../assets/images/i_am_the_seasons/bamboo_after_rain.png'), isSecret: false },
   { id: 's4', name: 'Summer\nMurmurs', image: require('../../assets/images/i_am_the_seasons/summer_murmurs.png'), isSecret: false },
@@ -66,7 +67,7 @@ const SEASONS_FIGURLERI = [
 // 4. SERİ: WE ARE ALL STARS FİGÜRLERİ
 // ==========================================
 const ALL_STARS_FIGURLERI = [
-  { id: 'a1', name: 'Sanctuary\nStar', image: require('../../assets/images/we_are_all_stars/sanctuary_star.png'), isSecret: false }, 
+  { id: 'a1', name: 'Sanctuary\nStar', image: require('../../assets/images/we_are_all_stars/sanctuary_star.png'), isSecret: false },
   { id: 'a2', name: 'Reminiscence\nStar', image: require('../../assets/images/we_are_all_stars/reminiscence_star.png'), isSecret: false },
   { id: 'a3', name: 'Meteor\nShower', image: require('../../assets/images/we_are_all_stars/meteor_shower.png'), isSecret: false },
   { id: 'a4', name: 'Mirrorlight\nStar', image: require('../../assets/images/we_are_all_stars/mirrorlight_star.png'), isSecret: false },
@@ -82,8 +83,10 @@ const ALL_STARS_FIGURLERI = [
 ];
 
 export default function CollectionScreen() {
-  const { starPoints, setStarPoints, ownedNyotas, addNyotaToCollection, activeNyotaId, setActiveNyotaId } = useNyota();
-  
+  const { starPoints, setStarPoints, ownedNyotas, addNyotaToCollection, activeNyotaId, setActiveNyotaId, isSoundEnabled } = useNyota();
+
+  const popPlayer = useAudioPlayer(require('../../assets/audio/pop.mp3'));
+
   useEffect(() => {
     if (!ownedNyotas.includes('f1')) {
       addNyotaToCollection('f1');
@@ -97,7 +100,7 @@ export default function CollectionScreen() {
   const [kutuOdasiAcik, setKutuOdasiAcik] = useState(false);
   const [seciliSeriIndex, setSeciliSeriIndex] = useState(0);
   const [isHolding, setIsHolding] = useState(false);
-  const [isExploding, setIsExploding] = useState(false); 
+  const [isExploding, setIsExploding] = useState(false);
   const [kutuAcildi, setKutuAcildi] = useState(false);
   const [kazanilanNyota, setKazanilanNyota] = useState<any>(null);
   const [isDuplicate, setIsDuplicate] = useState(false);
@@ -151,7 +154,7 @@ export default function CollectionScreen() {
       Alert.alert("Yetersiz Yıldız Puanı", "Kutu açmak için 500 PTS gerekiyor. Yan taraftaki şeffaf alana dokunarak hileyle puan ekleyebilirsin! 😉");
       return;
     }
-    
+
     setIsHolding(true);
     setHoldPercent(0);
 
@@ -172,7 +175,7 @@ export default function CollectionScreen() {
   const handleHoldRelease = () => {
     if (progressInterval.current) clearInterval(progressInterval.current);
     setIsHolding(false);
-    
+
     if (!isExploding && !kutuAcildi) {
       setHoldPercent(0);
     }
@@ -184,12 +187,17 @@ export default function CollectionScreen() {
     setIsExploding(true);
     setSparkleScale(0);
 
+    if (isSoundEnabled) {
+      popPlayer.seekTo(0);
+      popPlayer.play();
+    }
+
     let scaleVal = 0;
     const growInterval = setInterval(() => {
       scaleVal += 0.15;
       if (scaleVal >= 3.5) {
         clearInterval(growInterval);
-        
+
         // Patlama doruk noktasına ulaşınca söndür ve sonucu göster
         explodeTimeout.current = setTimeout(() => {
           setSparkleScale(0);
@@ -212,7 +220,7 @@ export default function CollectionScreen() {
     const secretItem = aktifSeri.figurler.find(f => f.isSecret);
 
     if (zar <= 5 && secretItem) {
-      cikan = secretItem; 
+      cikan = secretItem;
     } else {
       const rIndex = Math.floor(Math.random() * normalList.length);
       cikan = normalList[rIndex];
@@ -224,7 +232,7 @@ export default function CollectionScreen() {
     setKutuAcildi(true);
 
     if (zatenVarMi) {
-      setStarPoints(prev => prev + 150); 
+      setStarPoints(prev => prev + 150);
     } else {
       addNyotaToCollection(cikan.id);
     }
@@ -257,7 +265,7 @@ export default function CollectionScreen() {
             <X size={20} color="#AE8875" />
           </TouchableOpacity>
           <Text style={styles.gachaOdaBaslik}>Blind Box Odası</Text>
-          
+
           {/* 🌟 HİLE ALANI: PTS kutusunun solundaki bu şeffaf alana dokunursan +2000 PTS gelir */}
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity style={styles.gizliHileAlani} onPress={() => setStarPoints(p => p + 2000)} />
@@ -271,7 +279,7 @@ export default function CollectionScreen() {
         {!kutuAcildi ? (
           <View style={styles.gachaMerkezAlani}>
             <Text style={styles.seriSecimEtiket}>SALLAMAK İÇİN KUTUYA BASILI TUT</Text>
-            
+
             <View style={styles.seriOklarHatti}>
               <TouchableOpacity disabled={seciliSeriIndex === 0 || isHolding} onPress={() => setSeciliSeriIndex(p => p - 1)} style={[styles.okButon, (seciliSeriIndex === 0 || isHolding) && { opacity: 0.3 }]}>
                 <Text style={styles.okYazisi}>◀</Text>
@@ -313,7 +321,7 @@ export default function CollectionScreen() {
           <View style={styles.gachaSonucAlani}>
             <Sparkles size={40} color="#FFE07B" style={{ marginBottom: 10 }} />
             <Text style={styles.tebriklerYazisi}>{isDuplicate ? 'AYNISI ÇIKTI! 🥺' : 'YENİ BİR DOST GELDİ! 🎉'}</Text>
-            
+
             <View style={[styles.sonucGorselKonteyner, kazanilanNyota?.isSecret && styles.secretGachaBorder]}>
               {kazanilanNyota?.image ? (
                 <Image source={kazanilanNyota.image} style={styles.sonucNyotaGorsel} />
@@ -326,8 +334,8 @@ export default function CollectionScreen() {
 
             <Text style={styles.sonucNyotaIsmi}>{kazanilanNyota?.name.replace('\n', ' ')}</Text>
             <Text style={styles.sonucNyotaDetay}>
-              {isDuplicate 
-                ? 'Bu figüre zaten sahiptin. 150 PTS geri cüzdanına eklendi!' 
+              {isDuplicate
+                ? 'Bu figüre zaten sahiptin. 150 PTS geri cüzdanına eklendi!'
                 : `${aktifSeri.isim} koleksiyonunun yeni üyesi vitrindeki yerini aldı!`}
             </Text>
 
@@ -344,7 +352,7 @@ export default function CollectionScreen() {
     <View style={{ flex: 1, backgroundColor: '#FAF0E6' }}>
       <View style={styles.puanBarıHattı}>
         <TouchableOpacity style={styles.gizliHileAlani} onPress={() => setStarPoints(p => p + 2000)} />
-        
+
         <View style={styles.puanKapsül}>
           <Star size={14} color="#FFE07B" fill="#FFE07B" style={{ marginRight: 4 }} />
           <Text style={styles.puanText}>{starPoints} PTS</Text>
@@ -364,7 +372,7 @@ export default function CollectionScreen() {
           {seriler.map((seri) => (
             <View key={seri.id} style={styles.seriKonteyner}>
               <Text style={styles.seriEtiket}>{seri.isim}</Text>
-              
+
               <View style={styles.vitrinHatti}>
                 <View style={styles.kutuAfishani}>
                   {seri.kutuResmi ? (
@@ -381,9 +389,9 @@ export default function CollectionScreen() {
                     const aktifYoldas = activeNyotaId === figur.id;
 
                     return (
-                      <TouchableOpacity 
-                        key={figur.id} 
-                        activeOpacity={0.9} 
+                      <TouchableOpacity
+                        key={figur.id}
+                        activeOpacity={0.9}
                         style={[styles.nyotaOdacik, secili && styles.seciliOdacikSınırı]}
                         onPress={() => {
                           setSeciliNyotaId(figur.id);
@@ -396,7 +404,7 @@ export default function CollectionScreen() {
                               <Check size={10} color="#FFFFFF" strokeWidth={3} />
                             </View>
                           )}
-                          
+
                           {acik && figur.image ? (
                             <Image source={figur.image} style={styles.nyotaGorseli} />
                           ) : (
@@ -429,8 +437,8 @@ export default function CollectionScreen() {
               <Text style={styles.aktifYoldasText}>Şu Anki Odaklanma Arkadaşın ✨</Text>
             </View>
           ) : (
-            <TouchableOpacity 
-              style={styles.birlikteCalisButon} 
+            <TouchableOpacity
+              style={styles.birlikteCalisButon}
               onPress={() => setActiveNyotaId(seciliNyotaId)}
             >
               <Text style={styles.birlikteCalisButonYazi}>🤝 Birlikte Çalışalım</Text>
@@ -445,12 +453,12 @@ export default function CollectionScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FAF0E6', paddingHorizontal: 15 },
   puanBarıHattı: { position: 'absolute', top: height * 0.055, right: 20, zIndex: 999, flexDirection: 'row', alignItems: 'center' },
-  gizliHileAlani: { width: 40, height: 40, backgroundColor: 'transparent' }, 
+  gizliHileAlani: { width: 40, height: 40, backgroundColor: 'transparent' },
   puanKapsül: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3, elevation: 2 },
   puanText: { fontSize: 12, fontWeight: 'bold', color: '#4A4A4A' },
   mainTitle: { fontSize: 42, fontWeight: 'bold', textAlign: 'center', color: '#76B2E2', marginTop: 40 },
   subTitle: { fontSize: 12, textAlign: 'center', color: '#AE8875', marginBottom: 25, textTransform: 'uppercase', letterSpacing: 2 },
-  
+
   ustKutuAlButon: { flexDirection: 'row', backgroundColor: '#76B2E2', height: 48, borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginBottom: 20, shadowColor: '#76B2E2', shadowOpacity: 0.25, shadowRadius: 6, elevation: 3 },
   ustKutuAlButonYazi: { color: '#FFFFFF', fontSize: 13, fontWeight: 'bold', letterSpacing: 0.5 },
 
@@ -473,7 +481,7 @@ const styles = StyleSheet.create({
   seciliYaziRengi: { color: '#FFFFFF', fontWeight: 'bold' },
   secretText: { color: '#FFE07B', fontWeight: '700' },
   ahsapRafTahtasi: { height: 16, backgroundColor: '#8B5A2B', borderBottomLeftRadius: 6, borderBottomRightRadius: 6 },
-  
+
   altSecimPaneli: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, alignItems: 'center', gap: 12, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.08, shadowRadius: 6, elevation: 10 },
   altPanelBaslik: { fontSize: 14, fontWeight: 'bold', color: '#4A4A4A' },
   birlikteCalisButon: { backgroundColor: '#BEA4C6', width: '100%', height: 46, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
@@ -494,7 +502,7 @@ const styles = StyleSheet.create({
   okButon: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 20, shadowColor: '#000', shadowOpacity: 0.03, shadowRadius: 2, elevation: 1 },
   okYazisi: { fontSize: 14, color: '#AE8875', fontWeight: 'bold' },
   seriBaslikMetni: { fontSize: 18, fontWeight: 'bold', color: '#4A4A4A', textAlign: 'center', flex: 1, paddingHorizontal: 10 },
-  
+
   kutuDokunmatikKapsayici: { marginVertical: 20, width: 220, height: 300, justifyContent: 'center', alignItems: 'center', position: 'relative' },
   kutuGorselKonteyner: { width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' },
   gachaDevKutuGorsel: { width: '100%', height: '100%', resizeMode: 'contain' },
@@ -503,7 +511,7 @@ const styles = StyleSheet.create({
   gachaAltBarKapsayici: { width: '100%', height: 48, backgroundColor: '#BEA4C6', borderRadius: 16, justifyContent: 'center', alignItems: 'center', position: 'relative', overflow: 'hidden', marginTop: 15, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 3, elevation: 2 },
   gachaHoldDolumBar: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: 'rgba(255, 255, 255, 0.35)' },
   gachaAltBarYazi: { color: '#FFFFFF', fontSize: 13, fontWeight: 'bold', zIndex: 5 },
-  
+
   gachaSonucAlani: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 },
   tebriklerYazisi: { fontSize: 21, fontWeight: 'bold', color: '#76B2E2', marginBottom: 20, textAlign: 'center' },
   sonucGorselKonteyner: { width: 200, height: 280, backgroundColor: '#FFFFFF', borderRadius: 28, justifyContent: 'center', alignItems: 'center', padding: 10, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, elevation: 4 },
