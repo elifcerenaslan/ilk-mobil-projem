@@ -32,6 +32,9 @@
     "react-native-worklets": "0.5.1"
   },
   "devDependencies": {
+    "@babel/plugin-transform-class-properties": "^7.25.9",
+    "@babel/plugin-transform-private-methods": "^7.25.9",
+    "@babel/plugin-transform-private-property-in-object": "^7.25.9",
     "@types/react": "~19.1.10",
     "babel-preset-expo": "^57.0.2",
     "typescript": "~5.9.2"
