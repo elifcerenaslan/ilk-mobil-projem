@@ -1,6 +1,6 @@
+import 'react-native-gesture-handler';
 import { Tabs } from 'expo-router';
 import { BarChart3, Library, Timer } from 'lucide-react-native'; // 🌟 BarChart3 ikonu eklendi
-import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NyotaProvider } from '../context/NyotaContext';
 
