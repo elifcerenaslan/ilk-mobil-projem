@@ -39,6 +39,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": "https://fany.gov.co:443/https/yourdomain.com"
+      },
+      "eas": {
+        "projectId": "8c735719-e721-494a-8596-b71eea73d5d9"
+      }
     }
   }
 }
