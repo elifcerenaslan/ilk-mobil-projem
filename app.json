@@ -21,7 +21,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "newArchEnabled": false
+      "newArchEnabled": false,
+      "package": "com.elifcerenaslan.ilkmobilprojem"
     },
     "web": {
       "bundler": "metro",
